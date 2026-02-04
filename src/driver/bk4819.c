@@ -322,6 +322,18 @@ void BK4819_SetAGC(bool enable)
 
 void BK4819_InitAGC(bool amModulation)
 {
+
+    union {						// RX AGC Gain Table[0]
+        struct {
+            uint16_t	PGA_Gain	: 3;
+            uint16_t	MIX_Gain	: 2;
+            uint16_t	LNA_Gain	: 3;
+            uint16_t	LNA_GainS	: 2;
+            uint16_t	_res10		: 6;
+        };
+	    uint16_t __raw;
+    } reg10;
+
     // REG_10, REG_11, REG_12 REG_13, REG_14
     //
     // Rx AGC Gain Table[]. (Index Max->Min is 3,2,1,0,-1)
@@ -361,16 +373,60 @@ void BK4819_InitAGC(bool amModulation)
     //         0 = -33dB
     //
 
-    BK4819_WriteRegister(BK4819_REG_13, 0x03BE);  // 0x03BE / 000000 11 101 11 110 /  -7dB
-    BK4819_WriteRegister(BK4819_REG_12, 0x037B);  // 0x037B / 000000 11 011 11 011 / -24dB
-    BK4819_WriteRegister(BK4819_REG_11, 0x027B);  // 0x027B / 000000 10 011 11 011 / -43dB
-    BK4819_WriteRegister(BK4819_REG_10, 0x007A);  // 0x007A / 000000 00 011 11 010 / -58dB
+    //BK4819_WriteRegister(BK4819_REG_13, 0x03BE);  // 0x03BE / 000000 11 101 11 110 /  -7dB
+
+    //BK4819_WriteRegister(BK4819_REG_12, 0x037B);  // 0x037B / 000000 11 011 11 011 / -24dB
+    //BK4819_WriteRegister(BK4819_REG_11, 0x027B);  // 0x027B / 000000 10 011 11 011 / -43dB
+    //BK4819_WriteRegister(BK4819_REG_10, 0x007A);  // 0x007A / 000000 00 011 11 010 / -58dB
+
+
+    // Gain Table[3]		// MAX GAIN
+	reg10.LNA_GainS= 3;
+	reg10.LNA_Gain = 7;
+	reg10.MIX_Gain = 3;
+	reg10.PGA_Gain = 7;
+	BK4819_WriteRegister(BK4819_REG_13, reg10.__raw);
+	
+	// Gain Table[2]
+	reg10.LNA_GainS= 3;
+	reg10.LNA_Gain = 4;
+	reg10.MIX_Gain = 3;
+	reg10.PGA_Gain = 4;	
+	BK4819_WriteRegister(BK4819_REG_12, reg10.__raw);
+	
+	// Gain Table[1]
+	reg10.LNA_GainS= 2;
+	reg10.LNA_Gain = 3;
+	reg10.MIX_Gain = 2;
+	reg10.PGA_Gain = 3;
+	BK4819_WriteRegister(BK4819_REG_11, reg10.__raw);
+	
+	// Gain Table[0]
+	reg10.LNA_GainS= 2;
+	reg10.LNA_Gain = 1;
+	reg10.MIX_Gain = 2;
+	reg10.PGA_Gain = 1;
+	BK4819_WriteRegister(BK4819_REG_10, reg10.__raw);
+
     if(amModulation) {
-        BK4819_WriteRegister(BK4819_REG_14, 0x0000);
+        //BK4819_WriteRegister(BK4819_REG_14, 0x0000);
+        // Gain Table[-1]		// MIN GAIN
+        reg10.LNA_GainS= 0;
+        reg10.LNA_Gain = 0;
+        reg10.MIX_Gain = 0;
+        reg10.PGA_Gain = 0;
+        BK4819_WriteRegister(BK4819_REG_14, reg10.__raw);
+
         BK4819_WriteRegister(BK4819_REG_49, (0 << 14) | (50 << 7) | (32 << 0));
     }
     else{
-        BK4819_WriteRegister(BK4819_REG_14, 0x0019);  // 0x0019 / 000000 00 000 11 001 / -79dB
+        //BK4819_WriteRegister(BK4819_REG_14, 0x0019);  // 0x0019 / 000000 00 000 11 001 / -79dB
+        // Gain Table[-1]		// MIN GAIN
+        reg10.LNA_GainS= 0;
+        reg10.LNA_Gain = 0;
+        reg10.MIX_Gain = 3;
+        reg10.PGA_Gain = 1;
+        BK4819_WriteRegister(BK4819_REG_14, reg10.__raw);
         BK4819_WriteRegister(BK4819_REG_49, (0 << 14) | (84 << 7) | (56 << 0)); //0x2A38 / 00 1010100 0111000 / 84, 56
     }
 
