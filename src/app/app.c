@@ -1069,11 +1069,17 @@ void APP_Update(void)
     }
 
 #ifdef ENABLE_FMRADIO
+    #ifndef ENABLE_FMRADIO_BASIC
     if (gScheduleFM && gFM_ScanState != FM_SCAN_OFF && !FUNCTION_IsRx()) {
         // switch to FM radio mode
         FM_Play();
         gScheduleFM = false;
     }
+    #else
+    if (gScheduleFM) {
+        gScheduleFM = false;
+    }
+    #endif
 #endif
 
 #ifdef ENABLE_VOX
@@ -1742,7 +1748,9 @@ void APP_TimeSlice500ms(void)
 
     if (!gCssBackgroundScan && gScanStateDir == SCAN_OFF && !SCANNER_IsScanning()
 #ifdef ENABLE_FMRADIO
+    #ifndef ENABLE_FMRADIO_BASIC
         && (gFM_ScanState == FM_SCAN_OFF || gAskToSave)
+    #endif
 #endif
 #ifdef ENABLE_AIRCOPY
         && gScreenToDisplay != DISPLAY_AIRCOPY

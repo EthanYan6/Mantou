@@ -16,6 +16,7 @@ ENABLE_MESSENGER_UART					?= 1
 
 # ---- STOCK QUANSHENG FEATURES ----
 ENABLE_FMRADIO                  ?= 0
+ENABLE_FMRADIO_BASIC            ?= 1
 ENABLE_UART                     ?= 1
 ENABLE_VOICE                    ?= 0
 ENABLE_VOX                      ?= 0
@@ -252,6 +253,9 @@ ifeq ($(ENABLE_OVERLAY),1)
 endif
 ifeq ($(ENABLE_FMRADIO),1)
 	CCFLAGS += -DENABLE_FMRADIO
+endif
+ifeq ($(ENABLE_FMRADIO_BASIC),1)
+	CCFLAGS += -DENABLE_FMRADIO_BASIC
 endif
 ifeq ($(ENABLE_UART),1)
 	CCFLAGS += -DENABLE_UART

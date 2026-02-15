@@ -26,17 +26,27 @@
 #include "settings.h"
 #include "ui/fmradio.h"
 //#include "ui/helper.h"
+#ifndef ENABLE_FMRADIO_BASIC
 #include "ui/inputbox.h"
+#endif
 #include "ui/ui.h"
 #include "ui/gui.h"
 
 void UI_DisplayFM(void)
 {
     char String[16] = {0};
-    char *pPrintStr = String;
-    UI_ClearDisplay();
+#ifdef ENABLE_FMRADIO_BASIC
+    const char *modeLabel = "BASIC FM";
+#else
+    const char *pPrintStr = String;
+#endif
 
-    UI_PrintString("FM", 2, 0, 0, 8);
+    UI_ClearDisplay();
+    UI_SetBlackColor();
+
+    UI_DrawBox(0, 0, 128, 7);
+    UI_SetFont(FONT_8B_TR);
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 2, 0, 6, false, false, false, "FM");
 
     sprintf(String, "%d%s-%dM", 
         BK1080_GetFreqLoLimit(gEeprom.FM_Band)/10,
@@ -44,12 +54,26 @@ void UI_DisplayFM(void)
         BK1080_GetFreqHiLimit(gEeprom.FM_Band)/10
         );
     
-    UI_PrintStringSmallNormal(String, 1, 0, 6);
+    UI_SetFont(FONT_5_TR);
+    UI_DrawString(UI_TEXT_ALIGN_RIGHT, 0, 126, 6, false, false, false, String);
 
     //uint8_t spacings[] = {20,10,5};
     //sprintf(String, "%d0k", spacings[gEeprom.FM_Space % 3]);
     //UI_PrintStringSmallNormal(String, 127 - 4*7, 0, 6);
 
+    #ifdef ENABLE_FMRADIO_BASIC
+    UI_SetFont(FONT_8B_TR);
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 19, true, false, false, modeLabel);
+
+    sprintf(String, "%3d.%d", gEeprom.FM_FrequencyPlaying / 10, gEeprom.FM_FrequencyPlaying % 10);
+
+    UI_SetFont(FONT_BN_TN);
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 47, true, false, false, String);
+    UI_SetFont(FONT_5_TR);
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 63, true, false, false, "UP/DN TUNE 0:OFF 1:BAND");
+    UI_UpdateDisplay();
+    return;
+    #else
     if (gAskToSave) {
         pPrintStr = "SAVE?";
     } else if (gAskToDelete) {
@@ -75,11 +99,12 @@ void UI_DisplayFM(void)
         pPrintStr = "M-SCAN";
     }
 
-    UI_PrintString(pPrintStr, 0, 127, 3, 10); // memory, vfo, scan
+    UI_SetFont(FONT_8B_TR);
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 19, true, false, false, pPrintStr); // memory, vfo, scan
 
     memset(String, 0, sizeof(String));
     if (gAskToSave || (gEeprom.FM_IsMrMode && gInputBoxIndex > 0)) {
-        UI_GenerateChannelString(String, gFM_ChannelPosition);
+        sprintf(String, "CH-%02u", gFM_ChannelPosition + 1);
     } else if (gAskToDelete) {
         sprintf(String, "CH-%02u", gEeprom.FM_SelectedChannel + 1);
     } else {
@@ -90,12 +115,15 @@ void UI_DisplayFM(void)
             sprintf(String, "%.3s.%.1s",ascii, ascii + 3);
         }
 
-        UI_DisplayFrequency(String, 36, 1, gInputBoxIndex == 0);  // frequency
+        UI_SetFont(FONT_BN_TN);
+        UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 47, true, false, false, String);  // frequency
         UI_UpdateDisplay();
         return;
     }
 
-    UI_PrintString(String, 0, 127, 1, 10);
+    UI_SetFont(FONT_10_TR);
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 127, 44, true, false, false, String);
+    #endif
 
     UI_UpdateDisplay();
 }

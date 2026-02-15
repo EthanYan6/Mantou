@@ -129,8 +129,10 @@ void SETTINGS_InitEEPROM(void)
         gEeprom.FM_IsMrMode        = fmCfg.isMrMode;
     }
 
+    #ifndef ENABLE_FMRADIO_BASIC
     // 0E40..0E67
     EEPROM_ReadBuffer(0x0E40, gFM_Channels, sizeof(gFM_Channels));
+    #endif
     FM_ConfigureChannelState();
 #endif
 
@@ -573,8 +575,10 @@ void SETTINGS_SaveFM(void)
         //fmCfg.space    = gEeprom.FM_Space;
         EEPROM_WriteBuffer(0x0E88, fmCfg.__raw);
 
+        #ifndef ENABLE_FMRADIO_BASIC
         for (unsigned i = 0; i < 5; i++)
             EEPROM_WriteBuffer(0x0E40 + (i * 8), &gFM_Channels[i * 4]);
+        #endif
     }
 #endif
 

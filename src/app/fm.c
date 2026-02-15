@@ -24,12 +24,16 @@
 #include "audio.h"
 #include "dp32g030/gpio.h"
 #include "driver/bk1080.h"
+#ifndef ENABLE_FMRADIO_BASIC
 #include "driver/eeprom.h"
+#endif
 #include "driver/gpio.h"
 #include "functions.h"
 #include "misc.h"
 #include "settings.h"
+#ifndef ENABLE_FMRADIO_BASIC
 #include "ui/inputbox.h"
+#endif
 #include "ui/ui.h"
 #include "ui/gui.h"
 
@@ -37,15 +41,18 @@
     #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
+#ifndef ENABLE_FMRADIO_BASIC
 uint16_t          gFM_Channels[20];
+#endif
 bool              gFmRadioMode;
 uint8_t           gFmRadioCountdown_500ms;
 volatile uint16_t gFmPlayCountdown_10ms;
 volatile int8_t   gFM_ScanState;
+#ifndef ENABLE_FMRADIO_BASIC
 bool              gFM_AutoScan;
 uint8_t           gFM_ChannelPosition;
 bool              gFM_FoundFrequency;
-bool              gFM_AutoScan;
+#endif
 uint16_t          gFM_RestoreCountdown_10ms;
 
 
@@ -61,6 +68,7 @@ const uint8_t BUTTON_EVENT_LONG =  BUTTON_STATE_HELD;
 
 static void Key_FUNC(KEY_Code_t Key, uint8_t state);
 
+#ifndef ENABLE_FMRADIO_BASIC
 bool FM_CheckValidChannel(uint8_t Channel)
 {
     return  Channel < ARRAY_SIZE(gFM_Channels) && 
@@ -99,6 +107,14 @@ int FM_ConfigureChannelState(void)
 
     return 0;
 }
+#else
+int FM_ConfigureChannelState(void)
+{
+    gEeprom.FM_IsMrMode = false;
+    gEeprom.FM_FrequencyPlaying = gEeprom.FM_SelectedFrequency;
+    return 0;
+}
+#endif
 
 void FM_TurnOff(void)
 {
@@ -119,6 +135,7 @@ void FM_TurnOff(void)
     #endif
 }
 
+#ifndef ENABLE_FMRADIO_BASIC
 void FM_EraseChannels(void)
 {
     uint8_t      Template[8];
@@ -129,6 +146,7 @@ void FM_EraseChannels(void)
 
     memset(gFM_Channels, 0xFF, sizeof(gFM_Channels));
 }
+#endif
 
 void FM_Tune(uint16_t Frequency, int8_t Step, bool bFlag)
 {
@@ -136,13 +154,14 @@ void FM_Tune(uint16_t Frequency, int8_t Step, bool bFlag)
 
     gEnableSpeaker = false;
 
-    gFmPlayCountdown_10ms = (gFM_ScanState == FM_SCAN_OFF) ? fm_play_countdown_noscan_10ms : fm_play_countdown_scan_10ms;
-
-    gScheduleFM                 = false;
-    gFM_FoundFrequency          = false;
-    gAskToSave                  = false;
-    gAskToDelete                = false;
+    gFmPlayCountdown_10ms = fm_play_countdown_noscan_10ms;
+    gScheduleFM           = false;
     gEeprom.FM_FrequencyPlaying = Frequency;
+#ifndef ENABLE_FMRADIO_BASIC
+    gFM_FoundFrequency    = false;
+    gAskToSave            = false;
+    gAskToDelete          = false;
+#endif
 
     if (!bFlag) {
         Frequency += Step;
@@ -154,13 +173,27 @@ void FM_Tune(uint16_t Frequency, int8_t Step, bool bFlag)
         gEeprom.FM_FrequencyPlaying = Frequency;
     }
 
+    #ifdef ENABLE_FMRADIO_BASIC
+    gFM_ScanState = FM_SCAN_OFF;
+    #else
     gFM_ScanState = Step;
+    #endif
 
     BK1080_SetFrequency(gEeprom.FM_FrequencyPlaying, gEeprom.FM_Band/*, gEeprom.FM_Space*/);
 }
 
 void FM_PlayAndUpdate(void)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    gFM_ScanState = FM_SCAN_OFF;
+    gEeprom.FM_IsMrMode = false;
+    gEeprom.FM_FrequencyPlaying = gEeprom.FM_SelectedFrequency;
+    BK1080_SetFrequency(gEeprom.FM_FrequencyPlaying, gEeprom.FM_Band);
+    gFmPlayCountdown_10ms = 0;
+    gScheduleFM = false;
+    AUDIO_AudioPathOn();
+    gEnableSpeaker = true;
+#else
     gFM_ScanState = FM_SCAN_OFF;
 
     if (gFM_AutoScan) {
@@ -179,8 +212,10 @@ void FM_PlayAndUpdate(void)
     AUDIO_AudioPathOn();
 
     gEnableSpeaker   = true;
+#endif
 }
 
+#ifndef ENABLE_FMRADIO_BASIC
 int FM_CheckFrequencyLock(uint16_t Frequency, uint16_t LowerLimit)
 {
     int ret = -1;
@@ -243,9 +278,15 @@ int FM_CheckFrequencyLock(uint16_t Frequency, uint16_t LowerLimit)
 
     return ret;
 }
+#endif
 
 static void Key_DIGITS(KEY_Code_t Key, uint8_t state)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    (void)Key;
+    (void)state;
+    gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
+#else
     enum { STATE_FREQ_MODE, STATE_MR_MODE, STATE_SAVE };
 
     if (state == BUTTON_EVENT_SHORT && !gWasFKeyPressed) {
@@ -340,10 +381,17 @@ static void Key_DIGITS(KEY_Code_t Key, uint8_t state)
     }
     else
         Key_FUNC(Key, state);
+#endif
 }
 
 static void Key_FUNC(KEY_Code_t Key, uint8_t state)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    (void)state;
+    if (Key == KEY_EXIT) {
+        ACTION_FM();
+    }
+#else
     if (state == BUTTON_EVENT_SHORT || state == BUTTON_EVENT_HELD) {
         bool autoScan = gWasFKeyPressed || (state == BUTTON_EVENT_HELD);
 
@@ -387,10 +435,18 @@ static void Key_FUNC(KEY_Code_t Key, uint8_t state)
                 break;
         }
     }
+#endif
 }
 
 static void Key_EXIT(uint8_t state)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    if (state != BUTTON_EVENT_SHORT)
+        return;
+
+    gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
+    ACTION_FM();
+#else
     if (state != BUTTON_EVENT_SHORT)
         return;
 
@@ -435,10 +491,17 @@ static void Key_EXIT(uint8_t state)
     }
 
     gRequestDisplayScreen = DISPLAY_FM;
+#endif
 }
 
 static void Key_MENU(uint8_t state)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    if (state != BUTTON_EVENT_SHORT)
+        return;
+
+    gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
+#else
     if (state != BUTTON_EVENT_SHORT)
         return;
 
@@ -479,10 +542,29 @@ static void Key_MENU(uint8_t state)
         }
         gAskToSave = !gAskToSave;
     }
+#endif
 }
 
 static void Key_UP_DOWN(uint8_t state, int8_t Step)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    if (state != BUTTON_EVENT_PRESSED && state != BUTTON_EVENT_HELD)
+        return;
+
+    gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
+
+    uint16_t Frequency = gEeprom.FM_SelectedFrequency + Step;
+    if (Frequency < BK1080_GetFreqLoLimit(gEeprom.FM_Band))
+        Frequency = BK1080_GetFreqHiLimit(gEeprom.FM_Band);
+    else if (Frequency > BK1080_GetFreqHiLimit(gEeprom.FM_Band))
+        Frequency = BK1080_GetFreqLoLimit(gEeprom.FM_Band);
+
+    gEeprom.FM_SelectedFrequency = Frequency;
+    gEeprom.FM_FrequencyPlaying  = Frequency;
+    BK1080_SetFrequency(gEeprom.FM_FrequencyPlaying, gEeprom.FM_Band);
+    gRequestSaveFM = true;
+    gRequestDisplayScreen = DISPLAY_FM;
+#else
     if (state == BUTTON_EVENT_PRESSED) {
         if (gInputBoxIndex) {
             gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
@@ -537,6 +619,7 @@ Bail:
     BK1080_SetFrequency(gEeprom.FM_FrequencyPlaying, gEeprom.FM_Band/*, gEeprom.FM_Space*/);
 
     gRequestDisplayScreen = DISPLAY_FM;
+#endif
 }
 
 void FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
@@ -544,9 +627,29 @@ void FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
     uint8_t state = bKeyPressed + 2 * bKeyHeld;
 
     switch (Key) {
+#ifdef ENABLE_FMRADIO_BASIC
+        case KEY_0:
+            if (state == BUTTON_EVENT_PRESSED) {
+                ACTION_FM();
+            }
+            break;
+        case KEY_1:
+            if (state == BUTTON_EVENT_PRESSED) {
+                gEeprom.FM_Band++;
+                if (gEeprom.FM_Band > 1)
+                    gEeprom.FM_Band = 0;
+                gEeprom.FM_SelectedFrequency = BK1080_GetFreqLoLimit(gEeprom.FM_Band);
+                gEeprom.FM_FrequencyPlaying  = gEeprom.FM_SelectedFrequency;
+                BK1080_SetFrequency(gEeprom.FM_FrequencyPlaying, gEeprom.FM_Band);
+                gRequestSaveFM = true;
+                gRequestDisplayScreen = DISPLAY_FM;
+            }
+            break;
+#else
         case KEY_0...KEY_9:
             Key_DIGITS(Key, state);
             break;
+#endif
         case KEY_STAR:
             Key_FUNC(Key, state);
             break;
@@ -577,6 +680,15 @@ void FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 
 void FM_Play(void)
 {
+#ifdef ENABLE_FMRADIO_BASIC
+    gFmPlayCountdown_10ms = 0;
+    gEeprom.FM_SelectedFrequency = gEeprom.FM_FrequencyPlaying;
+
+    AUDIO_AudioPathOn();
+    gEnableSpeaker = true;
+
+    GUI_SelectNextDisplay(DISPLAY_FM);
+#else
     if (!FM_CheckFrequencyLock(gEeprom.FM_FrequencyPlaying, BK1080_GetFreqLoLimit(gEeprom.FM_Band))) {
         if (!gFM_AutoScan) {
             gFmPlayCountdown_10ms = 0;
@@ -608,6 +720,7 @@ void FM_Play(void)
         FM_Tune(gEeprom.FM_FrequencyPlaying, gFM_ScanState, false);
 
     GUI_SelectNextDisplay(DISPLAY_FM);
+#endif
 }
 
 void FM_Start(void)

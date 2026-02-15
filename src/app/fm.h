@@ -28,28 +28,33 @@ enum {
     FM_SCAN_OFF = 0U,
 };
 
+#ifndef ENABLE_FMRADIO_BASIC
 extern uint16_t          gFM_Channels[20];
+#endif
 extern bool              gFmRadioMode;
 extern uint8_t           gFmRadioCountdown_500ms;
 extern volatile uint16_t gFmPlayCountdown_10ms;
 extern volatile int8_t   gFM_ScanState;
+#ifndef ENABLE_FMRADIO_BASIC
 extern bool              gFM_AutoScan;
 extern uint8_t           gFM_ChannelPosition;
+extern bool              gFM_FoundFrequency;
+#endif
 // Doubts about          whether this should be signed or not
 extern uint16_t          gFM_FrequencyDeviation;
-extern bool              gFM_FoundFrequency;
 extern uint16_t          gFM_RestoreCountdown_10ms;
 
+#ifndef ENABLE_FMRADIO_BASIC
 bool    FM_CheckValidChannel(uint8_t Channel);
 // returns first valid channel starting at Channel
 uint8_t FM_FindNextChannel(uint8_t Channel, uint8_t Direction);
+void    FM_EraseChannels(void);
+int     FM_CheckFrequencyLock(uint16_t Frequency, uint16_t LowerLimit);
+#endif
 int     FM_ConfigureChannelState(void);
 void    FM_TurnOff(void);
-void    FM_EraseChannels(void);
-
 void    FM_Tune(uint16_t Frequency, int8_t Step, bool bFlag);
 void    FM_PlayAndUpdate(void);
-int     FM_CheckFrequencyLock(uint16_t Frequency, uint16_t LowerLimit);
 
 void    FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld);
 

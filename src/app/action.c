@@ -47,7 +47,7 @@
     #include "app/rega.h"
 #endif
 
-#if defined(ENABLE_FMRADIO)
+#if defined(ENABLE_FMRADIO) && !defined(ENABLE_FMRADIO_BASIC)
 static void ACTION_Scan_FM(bool bRestart);
 #endif
 
@@ -192,8 +192,13 @@ void ACTION_Scan(bool bRestart)
 
 #ifdef ENABLE_FMRADIO
     if (gFmRadioMode) {
+        #ifdef ENABLE_FMRADIO_BASIC
+        gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
+        return;
+        #else
         ACTION_Scan_FM(bRestart);
         return;
+        #endif
     }
 #endif
 
@@ -385,6 +390,7 @@ void ACTION_FM(void)
     }
 }
 
+#ifndef ENABLE_FMRADIO_BASIC
 static void ACTION_Scan_FM(bool bRestart)
 {
     if (FUNCTION_IsRx())
@@ -424,6 +430,7 @@ static void ACTION_Scan_FM(bool bRestart)
 #endif
 
 }
+#endif
 
 #endif
 

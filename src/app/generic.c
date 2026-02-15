@@ -87,10 +87,15 @@ void GENERIC_Key_F(bool bKeyPressed, bool bKeyHeld)
         }
 
 #ifdef ENABLE_FMRADIO
+    #ifndef ENABLE_FMRADIO_BASIC
         if (gFM_ScanState == FM_SCAN_OFF) { // not scanning
             gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
             return;
         }
+    #else
+        gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
+        return;
+    #endif
 #endif
         gBeepToPlay     = BEEP_440HZ_500MS;
         gPttWasReleased = true;
@@ -146,6 +151,7 @@ void GENERIC_Key_PTT(bool bKeyPressed)
 
 
 #ifdef ENABLE_FMRADIO
+    #ifndef ENABLE_FMRADIO_BASIC
     if (gFM_ScanState != FM_SCAN_OFF) { // FM radio is scanning .. stop
         FM_PlayAndUpdate();
 #ifdef ENABLE_VOICE
@@ -154,6 +160,7 @@ void GENERIC_Key_PTT(bool bKeyPressed)
         gRequestDisplayScreen = DISPLAY_FM;
         goto cancel_tx;
     }
+    #endif
 #endif
 
 #ifdef ENABLE_FMRADIO
