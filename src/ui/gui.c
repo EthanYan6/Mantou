@@ -120,7 +120,7 @@ void UI_SetFont(UI_Font font)
         break;
     case UI_FONT_8B_TR:
         u8g2_SetFont(gUiCtx.lcd, u8g2_font_8_tr); //u8g2_font_8b_tr save space
-        gUiCtx.only_upper_case = false;
+        gUiCtx.only_upper_case = true;
         break;
     case UI_FONT_10_TR:
         u8g2_SetFont(gUiCtx.lcd, u8g2_font_10_tr);

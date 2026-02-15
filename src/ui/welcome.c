@@ -42,21 +42,40 @@ void UI_DisplayWelcome(void)
     UI_SetBlackColor();
     UI_SetFont(FONT_8B_TR);
 
-    UI_DrawString(UI_TEXT_ALIGN_LEFT, 5, 0, 10, true, false, false, "Hello !");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 5, 0, 6, true, false, false, "Hello !");
 
-    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 128, 20, true, false, false, "UV-Kx Open Firmware");
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 128, 18, true, false, false, "UV-Kx Open Firmware");
 
     UI_DrawBatteryIcon(BATTERY_VoltsToPercent(gBatteryVoltageAverage), 20, 30);
 
     UI_SetFont(FONT_8_TR);
     UI_DrawStrf(8, 42, "%i%% %u.%02uV", BATTERY_VoltsToPercent(gBatteryVoltageAverage), gBatteryVoltageAverage / 100, gBatteryVoltageAverage % 100);
 
-    UI_DrawString(UI_TEXT_ALIGN_LEFT, 64, 0, 42, true, false, false, "EEPROM");
-    UI_DrawString(UI_TEXT_ALIGN_LEFT, 64, 0, 51, true, false, false, "FM");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 57, 0, 28, true, false, false, "EEPROM");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 57, 0, 36, true, false, false, "FM");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 57, 0, 44, true, false, false, "SPECTRUM");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 57, 0, 52, true, false, false, "SMR");
 
     UI_SetFont(FONT_5_TR);
-    UI_DrawString(UI_TEXT_ALIGN_LEFT, 110, 0, 42, true, true, false, "64");
-    UI_DrawString(UI_TEXT_ALIGN_LEFT, 110, 0, 51, true, true, false, "YES");
+    UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 28, true, true, false, "64");
+    
+    #ifdef ENABLE_FMRADIO
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 36, true, true, false, "YES");
+    #else
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 36, true, true, false, "NO");
+    #endif
+    
+    #ifdef ENABLE_SPECTRUM
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 44, true, true, false, "YES");
+    #else
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 44, true, true, false, "NO");
+    #endif
+
+    #ifdef ENABLE_MESSENGER
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 52, true, true, false, "YES");
+    #else
+        UI_DrawString(UI_TEXT_ALIGN_LEFT, 112, 0, 52, true, true, false, "NO");
+    #endif
     
     UI_SetBlackColor();
     UI_DrawBox(0, 57, 128, 7);

@@ -40,6 +40,7 @@
 #include "menu.h"
 #include "ui.h"
 #include "ui/gui.h"
+#include "ui/welcome.h"
 
 
 const t_menu_item MenuList[] =
@@ -133,11 +134,6 @@ const t_menu_item MenuList[] =
         #endif
     #endif
         {"VOX",         MENU_VOX           },
-    #ifdef ENABLE_FEAT_F4HWN
-        {"SYSINF",      MENU_VOL           }, // was "VOL"
-    #else
-        {"BATVOL",      MENU_VOL           }, // was "VOL"
-    #endif
         {"RX MODE",     MENU_TDR           },
     #ifdef ENABLE_FEAT_F4HWN
         {"SET PWR",     MENU_SET_PWR       },
@@ -165,6 +161,11 @@ const t_menu_item MenuList[] =
     #ifdef ENABLE_NOAA
         {"SET NWR",     MENU_NOAA_S    },
     #endif
+    #endif
+    #ifdef ENABLE_FEAT_F4HWN
+        {"ABOUT",       MENU_VOL           }, // was "VOL"
+    #else
+        {"BATVOL",      MENU_VOL           }, // was "VOL"
     #endif
         // hidden menu items from here on
         // enabled if pressing both the PTT and upper side button at power-on
@@ -335,6 +336,12 @@ const char gSubMenu_BATTYP[][9] =
  "1600mAh",
  "2200mAh",
  "3500mAh"
+};
+
+static const char gSubMenu_ABOUT[][8] =
+{
+ "SYSTEM",
+ "WELCOME"
 };
 
 
@@ -1088,6 +1095,18 @@ static const char* UI_MENU_GetOptionLinesForId(int menuId)
 #endif
     case MENU_PTT_ID:
         return UI_MENU_JoinPtrList(gSubMenu_PTT_ID, ARRAY_SIZE(gSubMenu_PTT_ID));
+    case MENU_VOL:
+        if (gIsInSubMenu) {
+            return UI_MENU_JoinFixedList((const char*)gSubMenu_ABOUT, sizeof(gSubMenu_ABOUT[0]), ARRAY_SIZE(gSubMenu_ABOUT));
+        }
+        snprintf(buf, sizeof(gMenuListBuffer), "%s\n%s\n%s\n%u.%02uV %u%%",
+            AUTHOR_STRING_2,
+            VERSION_STRING_2,
+            EDITION_STRING,
+            gBatteryVoltageAverage / 100, gBatteryVoltageAverage % 100,
+            BATTERY_VoltsToPercent(gBatteryVoltageAverage)
+        );
+        return buf;
 #ifdef ENABLE_FEAT_F4HWN
     case MENU_SET_PWR:
         return UI_MENU_JoinFixedList((const char*)gSubMenu_SET_PWR, sizeof(gSubMenu_SET_PWR[0]), ARRAY_SIZE(gSubMenu_SET_PWR));
@@ -1187,15 +1206,6 @@ static const char* UI_MENU_GetOptionLinesForId(int menuId)
 #else
         return gSubMenu_NA;
 #endif
-        break;
-    case MENU_VOL:
-        snprintf(buf, sizeof(gMenuListBuffer), "%s\n%s\n%s\n%u.%02uV %u%%",
-            AUTHOR_STRING_2,
-            VERSION_STRING_2,
-            EDITION_STRING,
-            gBatteryVoltageAverage / 100, gBatteryVoltageAverage % 100,
-            BATTERY_VoltsToPercent(gBatteryVoltageAverage)
-        );
         break;
     case MENU_MEM_CH:
     case MENU_1_CALL:
@@ -1313,6 +1323,10 @@ void UI_DisplayMenu(void)
     else if (gIsInSubMenu) {
         // gSubMenuSelection
         const int current_menu_id = UI_MENU_GetCurrentMenuId();
+        if (current_menu_id == MENU_VOL && gSubMenuSelection == 1) {
+            UI_DisplayWelcome();
+            return;
+        }
     #ifdef ENABLE_SCANLIST
         if (current_menu_id == MENU_SLIST1 ||
             current_menu_id == MENU_SLIST2 ||

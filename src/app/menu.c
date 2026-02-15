@@ -213,6 +213,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 #ifdef ENABLE_DTMF_CALLING
         {MENU_D_LIST, 1, 16},
 #endif
+        {MENU_VOL, 0, 1},
 #ifdef ENABLE_F_CAL_MENU
         {MENU_F_CALI, -50, 50},
 #endif
@@ -1073,6 +1074,10 @@ void MENU_ShowCurrentSetting(void)
             gSubMenuSelection = gTxVfo->Modulation;
             break;
 
+        case MENU_VOL:
+            gSubMenuSelection = 0;
+            break;
+
 #ifndef ENABLE_FEAT_F4HWN
     #ifdef ENABLE_AM_FIX
             case MENU_AM_FIX:
@@ -1464,6 +1469,16 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
     if (!gIsInSubMenu)
     {
         
+        if (UI_MENU_GetCurrentMenuId() == MENU_VOL)
+        {
+            gAskForConfirmation = 0;
+            gIsInSubMenu        = true;
+            gSubMenuSelection   = 1;   // open ABOUT directly on WELCOME
+            gInputBoxIndex      = 0;
+            edit_index          = -1;
+            return;
+        }
+
         if (UI_MENU_GetCurrentMenuId() == MENU_UPCODE
             || UI_MENU_GetCurrentMenuId() == MENU_DWCODE
 #ifdef ENABLE_DTMF_CALLING

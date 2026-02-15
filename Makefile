@@ -4,6 +4,7 @@
 
 ENABLE_REMOTE_CONTROL			?= 0
 ENABLE_UART_DEBUG			  	?= 0
+ENABLE_SPEED_OPTS                ?= 0
 
 ENABLE_MESSENGER              			?= 1
 ENABLE_MESSENGER_DELIVERY_NOTIFICATION	?= 1
@@ -21,7 +22,7 @@ ENABLE_UART                     ?= 1
 ENABLE_VOICE                    ?= 0
 ENABLE_VOX                      ?= 0
 ENABLE_ALARM                    ?= 0
-ENABLE_TX1750                   ?= 1
+ENABLE_TX1750                   ?= 0
 ENABLE_DTMF_CALLING             ?= 0
 ENABLE_DTMF                     ?= 0
 
@@ -38,7 +39,7 @@ ENABLE_NO_CODE_SCAN_TIMEOUT     ?= 1
 ENABLE_AM_FIX                   ?= 1
 ENABLE_SQUELCH_MORE_SENSITIVE   ?= 1
 ENABLE_FASTER_CHANNEL_SCAN      ?= 1
-ENABLE_RSSI_BAR                 ?= 1
+ENABLE_RSSI_BAR                 ?= 0
 ENABLE_AUDIO_BAR                ?= 0
 ENABLE_COPY_CHAN_TO_VFO         ?= 0
 ENABLE_REDUCE_LOW_MID_TX_POWER  ?= 0
@@ -178,7 +179,9 @@ ASMFLAGS += -mcpu=cortex-m0
 CCFLAGS =
 CCFLAGS += -Wall -Werror -mcpu=cortex-m0 -fno-builtin -fshort-enums -fno-delete-null-pointer-checks -MMD -g
 CCFLAGS += -flto=1
+ifeq ($(ENABLE_SPEED_OPTS),1)
 CCFLAGS += -ftree-vectorize -funroll-loops
+endif
 CCFLAGS += -Wextra -Wno-unused-function -Wno-unused-variable -Wno-unknown-pragmas
 #-Wunused-parameter -Wconversion
 CCFLAGS += -fno-math-errno -pipe -ffunction-sections -fdata-sections -ffast-math -fno-strict-aliasing
