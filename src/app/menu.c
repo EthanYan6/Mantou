@@ -213,7 +213,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 #ifdef ENABLE_DTMF_CALLING
         {MENU_D_LIST, 1, 16},
 #endif
-        {MENU_VOL, 0, 1},
+        {MENU_VOL, 0, 0},
 #ifdef ENABLE_F_CAL_MENU
         {MENU_F_CALI, -50, 50},
 #endif
@@ -1473,7 +1473,6 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
         {
             gAskForConfirmation = 0;
             gIsInSubMenu        = true;
-            gSubMenuSelection   = 1;   // open ABOUT directly on WELCOME
             gInputBoxIndex      = 0;
             edit_index          = -1;
             return;

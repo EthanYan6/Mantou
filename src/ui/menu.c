@@ -15,7 +15,6 @@
  */
 
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "app/dtmf.h"
@@ -337,13 +336,6 @@ const char gSubMenu_BATTYP[][9] =
  "2200mAh",
  "3500mAh"
 };
-
-static const char gSubMenu_ABOUT[][8] =
-{
- "SYSTEM",
- "WELCOME"
-};
-
 
 #ifdef ENABLE_FEAT_F4HWN
 const char gSubMenu_SET_PWR[][6] =
@@ -1017,7 +1009,7 @@ static const char* UI_MENU_GetOptionLinesForId(int menuId)
     int32_t        mMin;
     int32_t        mMax;
     char* buf = gMenuListBuffer;
-    MENU_GetLimits(UI_MENU_GetCurrentMenuId(), &mMin, &mMax);
+    MENU_GetLimits(menuId, &mMin, &mMax);
 
     switch (menuId)
     {
@@ -1096,9 +1088,6 @@ static const char* UI_MENU_GetOptionLinesForId(int menuId)
     case MENU_PTT_ID:
         return UI_MENU_JoinPtrList(gSubMenu_PTT_ID, ARRAY_SIZE(gSubMenu_PTT_ID));
     case MENU_VOL:
-        if (gIsInSubMenu) {
-            return UI_MENU_JoinFixedList((const char*)gSubMenu_ABOUT, sizeof(gSubMenu_ABOUT[0]), ARRAY_SIZE(gSubMenu_ABOUT));
-        }
         snprintf(buf, sizeof(gMenuListBuffer), "%s\n%s\n%s\n%u.%02uV %u%%",
             AUTHOR_STRING_2,
             VERSION_STRING_2,
@@ -1184,7 +1173,10 @@ static const char* UI_MENU_GetOptionLinesForId(int menuId)
     case MENU_OFFSET:
         if (!gIsInSubMenu || gInputBoxIndex == 0)
         {
-            snprintf(buf, sizeof(gMenuListBuffer), "%3d.%.4u MHz", gSubMenuSelection / 100000, abs(gSubMenuSelection) % 100000);
+            const uint32_t frac = (gSubMenuSelection < 0)
+                ? (uint32_t)(-gSubMenuSelection)
+                : (uint32_t)gSubMenuSelection;
+            snprintf(buf, sizeof(gMenuListBuffer), "%3d.%.4u MHz", gSubMenuSelection / 100000, frac % 100000U);
         }
         else
         {
@@ -1293,6 +1285,8 @@ void setSubMenu(void) {
 
 void UI_DisplayMenu(void)
 {
+    const int current_menu_id = UI_MENU_GetCurrentMenuId();
+
     // clear the screen
     UI_ClearDisplay();
     // redraw the menu
@@ -1309,8 +1303,8 @@ void UI_DisplayMenu(void)
 
     UI_SelectionList_Draw(&menuList, 15, getCurrentOption());
 
-    if ((UI_MENU_GetCurrentMenuId() == MENU_RESET ||
-        UI_MENU_GetCurrentMenuId() == MENU_MEM_CH/* ||
+    if ((current_menu_id == MENU_RESET ||
+        current_menu_id == MENU_MEM_CH/* ||
         UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME ||
         UI_MENU_GetCurrentMenuId() == MENU_DEL_CH*/) && gAskForConfirmation)
     {   // display confirmation
@@ -1321,9 +1315,7 @@ void UI_DisplayMenu(void)
 
     }
     else if (gIsInSubMenu) {
-        // gSubMenuSelection
-        const int current_menu_id = UI_MENU_GetCurrentMenuId();
-        if (current_menu_id == MENU_VOL && gSubMenuSelection == 1) {
+        if (current_menu_id == MENU_VOL) {
             UI_DisplayWelcome();
             return;
         }

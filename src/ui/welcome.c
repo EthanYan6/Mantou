@@ -44,7 +44,7 @@ void UI_DisplayWelcome(void)
 
     UI_DrawString(UI_TEXT_ALIGN_LEFT, 5, 0, 6, true, false, false, "Hello !");
 
-    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 128, 18, true, false, false, "UV-Kx Open Firmware");
+    UI_DrawString(UI_TEXT_ALIGN_CENTER, 0, 128, 16, true, false, false, "UV-Kx Open Firmware");
 
     UI_DrawBatteryIcon(BATTERY_VoltsToPercent(gBatteryVoltageAverage), 20, 30);
 

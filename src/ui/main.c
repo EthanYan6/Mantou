@@ -15,7 +15,6 @@
  */
 
 #include <string.h>
-#include <stdlib.h>  // abs()
 
 #include "app/chFrScanner.h"
 #include "app/dtmf.h"
@@ -575,7 +574,7 @@ void UI_DisplayMain(void)
         } else {
             int i = vfoInfoA->TX_OFFSET_FREQUENCY_DIRECTION % 3;
             UI_SetFont(UI_FONT_BN_TN);
-            UI_DrawStringf(UI_TEXT_ALIGN_LEFT, 40, 0, 19, true, false, false, "%s", i == 1 ? "+" : (i == 2 ? "-" : ""));
+            UI_DrawString(UI_TEXT_ALIGN_LEFT, 40, 0, 19, true, false, false, i == 1 ? "+" : (i == 2 ? "-" : ""));
         }
     }    
 

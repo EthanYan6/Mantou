@@ -104,8 +104,6 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
         if(Key == 2) { // Enable A/B only
             gVfoConfigureMode     = VFO_CONFIGURE;
             COMMON_SwitchVFOs();
-            if (beep)
-                gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
         }
 
         return; // prevent F function if MENU LOCK is true
@@ -132,7 +130,6 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
             if (!IS_FREQ_CHANNEL(gTxVfo->CHANNEL_SAVE)) {
                 gWasFKeyPressed = false;
                 gUpdateStatus   = true;
-                gBeepToPlay     = BEEP_1KHZ_60MS_OPTIONAL;
 
 #ifdef ENABLE_COPY_CHAN_TO_VFO
                 if (!gEeprom.VFO_OPEN || gCssBackgroundScan) {
@@ -205,8 +202,6 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
                 gVfoConfigureMode     = VFO_CONFIGURE;
             #endif
             COMMON_SwitchVFOs();
-            if (beep)
-                gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
             break;
 
         case KEY_3:
@@ -225,8 +220,6 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
             gBackup_CROSS_BAND_RX_TX  = gEeprom.CROSS_BAND_RX_TX;
             gEeprom.CROSS_BAND_RX_TX = CROSS_BAND_OFF;
             gUpdateStatus            = true;        
-            if (beep)
-                gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
 
             SCANNER_Start(false);
             gRequestDisplayScreen = DISPLAY_SCANNER;
@@ -344,9 +337,6 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
         default:
             gUpdateStatus   = true;
             gWasFKeyPressed = false;
-
-            if (beep)
-                gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
             break;
     }
 }
