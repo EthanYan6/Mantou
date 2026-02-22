@@ -71,6 +71,7 @@ void U8G2_HAL_Init(void) {
     u8g2_InitDisplay(&u8g2); // send init sequence to the display, display is in sleep mode after this,
     u8g2_SetPowerSave(&u8g2, 0); // wake up display
     //u8g2_SetContrast(&u8g2, 128);
-    u8g2_ClearDisplay(&u8g2);
+    u8g2_ClearBuffer(&u8g2);
+    u8g2_SendBuffer(&u8g2);
 
 }

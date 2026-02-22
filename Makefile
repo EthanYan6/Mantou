@@ -431,14 +431,14 @@ CCFLAGS  += -DU8G2_WITHOUT_FONT_ROTATION
 CCFLAGS  += -DU8G2_WITHOUT_CLIP_WINDOW_SUPPORT
 CCFLAGS  += -DU8G2_WITHOUT_INTERSECTION
 CCFLAGS  += -DU8G2_WITHOUT_HVLINE_SPEED_OPTIMIZATION
+CCFLAGS  += -DU8X8_WITHOUT_SET_CONTRAST
 
 U8G2_SRCS = \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_bitmap.c \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_box.c \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_buffer.c \
-	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_cleardisplay.c \
-	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_d_memory.c \
-	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_d_setup.c \
+	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_d_memory_minimal.c \
+	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_d_setup_minimal.c \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_font.c \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_hvline.c \
 	$(EXTERNAL_LIB)/U8G2/csrc/u8g2_ll_hvline.c \
