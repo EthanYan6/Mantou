@@ -22,22 +22,14 @@
 
 void SPI0_Init(void)
 {
-    SPI_Config_t Config;
+    SPI_Config_t Config = {0};
 
     SPI_Disable(&SPI0->CR);
 
-    Config.TXFIFO_EMPTY = 0;
-    Config.RXFIFO_HFULL = 0;
-    Config.RXFIFO_FULL = 0;
-    Config.RXFIFO_OVF = 0;
     Config.MSTR = 1;
     Config.SPR = 2;
     Config.CPHA = 1;
     Config.CPOL = 1;
-    Config.LSB = 0;
-    Config.TF_CLR = 0;
-    Config.RF_CLR = 0;
-    Config.TXFIFO_HFULL = 0;
     SPI_Configure(SPI0, &Config);
 
     SPI_Enable(&SPI0->CR);
@@ -45,16 +37,8 @@ void SPI0_Init(void)
 
 void SPI_WaitForUndocumentedTxFifoStatusBit(void)
 {
-    uint32_t Timeout;
-
-    Timeout = 0;
-    do {
-        // Undocumented bit!
-        if ((SPI0->IF & 0x20) == 0) {
-            break;
-        }
-        Timeout++;
-    } while (Timeout <= 100000);
+    uint32_t Timeout = 100000;
+    while ((SPI0->IF & 0x20) && --Timeout) {}
 }
 
 void SPI_Disable(volatile uint32_t *pCR)

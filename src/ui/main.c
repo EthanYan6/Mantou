@@ -24,7 +24,7 @@
 #ifdef ENABLE_MESSENGER
 	#include "app/messenger.h"
 #endif
-#include "bitmaps.h"
+// #include "bitmaps.h"
 #include "board.h"
 #include "driver/bk4819.h"
 //#include "driver/st7565.h"
@@ -99,6 +99,7 @@ static const uint8_t kBarHollow[]     = {0b01111111, 0b01000001, 0b01000001, 0b0
 #endif
 #endif
 */
+/*
 static void DrawSmallAntennaAndBars(uint8_t *p, unsigned int level)
 {
     if(level>6)
@@ -111,6 +112,7 @@ static void DrawSmallAntennaAndBars(uint8_t *p, unsigned int level)
         memset(p + 2 + i*3, bar, 2);
     }
 }
+*/
 #if defined ENABLE_AUDIO_BAR || defined ENABLE_RSSI_BAR
 
 /*static void DrawLevelBar(uint8_t xpos, uint8_t line, uint8_t level, uint8_t bars)
